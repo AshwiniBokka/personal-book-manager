@@ -13,15 +13,25 @@ function App() {
 
   // Load books from localStorage when component mounts
   useEffect(() => {
-    const savedBooks = localStorage.getItem('personalBooks');
-    if (savedBooks) {
-      setBooks(JSON.parse(savedBooks));
+    try {
+      const savedBooks = localStorage.getItem('personalBooks');
+      if (savedBooks) {
+        const parsedBooks = JSON.parse(savedBooks);
+        setBooks(Array.isArray(parsedBooks) ? parsedBooks : []);
+      }
+    } catch (error) {
+      console.error("Error loading books:", error);
+      setBooks([]);
     }
   }, []);
 
   // Save books to localStorage whenever books change
   useEffect(() => {
-    localStorage.setItem('personalBooks', JSON.stringify(books));
+    try {
+      localStorage.setItem('personalBooks', JSON.stringify(books));
+    } catch (error) {
+      console.error("Error saving books:", error);
+    }
   }, [books]);
 
   const addBook = (e) => {
@@ -36,7 +46,8 @@ function App() {
         status,
         notes: notes.trim(),
       };
-      setBooks([...books, newBook]);
+      setBooks(prevBooks => [...prevBooks, newBook]);
+      
       // Reset form
       setTitle("");
       setAuthor("");
@@ -48,15 +59,17 @@ function App() {
   };
 
   const removeBook = (id) => {
-    setBooks(books.filter(book => book.id !== id));
+    setBooks(prevBooks => prevBooks.filter(book => book.id !== id));
   };
 
   const toggleStatus = (id) => {
-    setBooks(books.map(book => 
-      book.id === id 
-        ? { ...book, status: book.status === "Read" ? "Want to Read" : "Read" }
-        : book
-    ));
+    setBooks(prevBooks => 
+      prevBooks.map(book => 
+        book.id === id 
+          ? { ...book, status: book.status === "Read" ? "Want to Read" : "Read" }
+          : book
+      )
+    );
   };
 
   // Filter books based on search
