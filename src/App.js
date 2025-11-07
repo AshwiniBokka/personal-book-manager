@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
@@ -10,6 +10,19 @@ function App() {
   const [status, setStatus] = useState("Want to Read");
   const [notes, setNotes] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Load books from localStorage when component mounts
+  useEffect(() => {
+    const savedBooks = localStorage.getItem('personalBooks');
+    if (savedBooks) {
+      setBooks(JSON.parse(savedBooks));
+    }
+  }, []);
+
+  // Save books to localStorage whenever books change
+  useEffect(() => {
+    localStorage.setItem('personalBooks', JSON.stringify(books));
+  }, [books]);
 
   const addBook = (e) => {
     e.preventDefault();
